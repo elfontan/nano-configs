@@ -64,7 +64,7 @@ git clone ssh://git@gitlab.cern.ch:7999/tthcc-run-3/BFragmentationAnalyzer.git T
 
 
 # now the modified release for TOP weights and AK4Puppi ParT
-git cms-merge-topic -u elfontan:dev/CMSSW_16_1_3_ScoutProduction 
+git cms-merge-topic -u elfontan:elfontan/dev/CMSSW_16_1_3_ScoutProduction 
 
 # and for the leptons (not needed anymore)
 # git cms-merge-topic -u JulesVandenbroeck:dev/CMSSW_15_0_17_leptonParT
