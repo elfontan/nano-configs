@@ -3,6 +3,8 @@
 # technically CMSSW_15_0_15_patch4 but we use the same for 15_0_17
 
 DDD_MAGFIELD=${DDD_MAGFIELD:-0}
+# Match the validated local MC 2024 configuration; override for another input.
+MC_2024_FILEIN=${MC_2024_FILEIN:-/store/mc/RunIII2024Summer24MiniAODv6/HHto2B2G-SChan-h-SChan-interference_Par-Eta-0-M-270-RelWidth-0p01_TuneCP5_13p6TeV_madgraph-pythia8/MINIAODSIM/150X_mcRun3_2024_realistic_v2-v3/2560000/64c89e7a-90bd-4036-a43c-bd028c80ec72.root}
 for arg in "$@"; do
     [[ ${arg} == "--ddd-magfield" ]] && DDD_MAGFIELD=1
 done
@@ -36,7 +38,7 @@ cmsDriver.py data_2018UL --data --eventcontent NANOAOD --datatier NANOAOD --file
 
 # # MC, 2024 (used for all years with v15)
 # cmsDriver.py TESTORIG --mc --era Run3_2024 --step NANO --conditions 150X_mcRun3_2024_realistic_v2 --datatier NANOAODSIM --eventcontent NANOAODSIM --fileout file:nano.root --filein file:inMINIAOD.root --no_exec -n -1
-cmsDriver.py mc_2024 --mc --era Run3_2024 --step NANO:@PHYS+@Scout --conditions 150X_mcRun3_2024_realistic_v2 --datatier NANOAODSIM --eventcontent NANOAODSIM --fileout file:nano.root --filein file:inMINIAOD.root --no_exec -n -1 --nThreads 2
+cmsDriver.py mc_2024 --mc --era Run3_2024 --step NANO:@PHYS+@Scout --conditions 150X_mcRun3_2024_realistic_v2 --datatier NANOAODSIM --eventcontent NANOAODSIM --fileout file:nano.root --filein "${MC_2024_FILEIN}" --no_exec -n -1 --nThreads 2
 # --customise_commands=process.load('PhysicsTools.NanoAOD.custom_run3scouting_cff')\n process.nanoScouting_step = cms.Path(process.nanoSequence)\n process.schedule.extend([process.nanoScouting_step])
 
 # # Data, 2022+2022EE
@@ -70,6 +72,17 @@ for cfg in $(ls mc_*.py); do
     if [[ ${cfg} == *2024* ]]; then
         echo "--- Adding scouting info to ${cfg}"
         sed -i -e '/# Customisation from command line/a process.load("PhysicsTools.NanoAOD.custom_run3scouting_cff")\nprocess.nanoScouting_step = cms.Path(process.nanoSequence)\nprocess.schedule.extend([process.nanoScouting_step])\n' ${cfg}
+        # Run this after the existing customizations and before early deletion.
+        echo "--- Adding shared AK4 ParticleNet scores and scouting SV/V0 tables to ${cfg}"
+        sed -i '/^customizeAddWeights(process,/a\
+\n\
+# Run scouting and HLT ParticleNet on shared AK4 jets and save both score\
+# families in ScoutingPFJetRecluster, plus inclusive scouting SV/V0 tables, using the\
+# converted scouting primary vertices and the offline beam spot.\
+# Branch and model details: AK4_PNET_REPORT.pdf.\
+from PhysicsTools.PatFromScouting.scoutingToMiniAODDerivedCollections_cff import customiseScoutingNanoAK4\
+process = customiseScoutingNanoAK4(process)\
+' "${cfg}"
     fi
 done
 
