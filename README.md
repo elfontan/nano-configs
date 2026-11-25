@@ -42,8 +42,8 @@ cmssw-el8
 export VO_CMS_SW_DIR=/cvmfs/cms.cern.ch
 source $VO_CMS_SW_DIR/cmsset_default.sh
 export SCRAM_ARCH=el8_amd64_gcc12
-cmsrel CMSSW_15_0_17
-cd CMSSW_15_0_17/src
+cmsrel CMSSW_16_1_3
+cd CMSSW_16_1_3/src
 cmsenv
 
 git cms-init
@@ -64,7 +64,7 @@ git clone ssh://git@gitlab.cern.ch:7999/tthcc-run-3/BFragmentationAnalyzer.git T
 
 
 # now the modified release for TOP weights and AK4Puppi ParT
-git cms-merge-topic -u SWuchterl:dev/CMSSW_15_0_17_nanoV15ExtSkimLeptonParT
+git cms-merge-topic -u elfontan:dev/CMSSW_16_1_3_ScoutProduction 
 
 # and for the leptons (not needed anymore)
 # git cms-merge-topic -u JulesVandenbroeck:dev/CMSSW_15_0_17_leptonParT
